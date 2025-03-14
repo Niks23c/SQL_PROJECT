@@ -1,0 +1,229 @@
+/* Amazon Sales Data Analysis */
+
+-- Create Database
+CREATE DATABASE Amazon;
+USE Amazon;
+
+-- Create Table and Insert Data (Assuming Table Structure Already Exists)
+SELECT Invoice_ID FROM Amazon_1;
+
+-- Create Another Database (If Needed)
+CREATE DATABASE Amazon_2;
+USE Amazon_2;
+
+-- Rename Column for Better Readability
+ALTER TABLE Amazon RENAME COLUMN `gross income` TO Gross_Income;
+
+/* Check for NULL Values */
+SELECT * FROM Amazon 
+WHERE Invoice_ID IS NULL  
+   OR Branch IS NULL 
+   OR City IS NULL; 
+
+-- No NULL values found, proceeding with analysis.
+
+/* FEATURE ENGINEERING */
+-- Add Columns for Better Insights
+ALTER TABLE Amazon 
+ADD COLUMN TimeOfDay VARCHAR(20),
+ADD COLUMN DayName VARCHAR(20),
+ADD COLUMN MonthName VARCHAR(20);
+
+-- Assign Time of Day Categories
+UPDATE Amazon
+SET TimeOfDay =  
+CASE  
+    WHEN HOUR(`Time`) BETWEEN 6 AND 11 THEN 'Morning' 
+    WHEN HOUR(`Time`) BETWEEN 12 AND 17 THEN 'Afternoon' 
+    ELSE 'Evening' 
+END;
+
+-- Disable Safe Updates (If Required)
+SET SQL_SAFE_UPDATES = 0;
+
+-- Populate Day Name and Month Name Columns
+UPDATE Amazon
+SET DayName = DAYNAME(Date);
+
+UPDATE Amazon
+SET MonthName = MONTHNAME(Date);
+
+-- Feature Engineering Completed
+
+/* EXPLORATORY DATA ANALYSIS */
+
+-- Count of Distinct Cities
+SELECT COUNT(DISTINCT City) AS Cities FROM Amazon;
+
+-- Each Branch and Its Corresponding City
+SELECT DISTINCT Branch, City FROM Amazon;
+
+-- Count of Distinct Product Lines
+SELECT COUNT(DISTINCT `Product Line`) AS Product_Lines FROM Amazon;
+
+-- Most Frequently Used Payment Method
+SELECT Payment, COUNT(*) AS Count FROM Amazon
+GROUP BY Payment
+ORDER BY Count DESC
+LIMIT 1;
+
+-- Product Line with Highest Sales
+SELECT `Product Line`, SUM(Unit_Price * Quantity) AS Total_Sales 
+FROM Amazon
+GROUP BY `Product Line`
+ORDER BY Total_Sales DESC 
+LIMIT 1;
+
+-- Revenue Generated Each Month
+SELECT MonthName, SUM(Unit_Price * Quantity) AS Revenue 
+FROM Amazon
+GROUP BY MonthName
+ORDER BY Revenue DESC;
+
+-- Month with Highest Cost of Goods Sold (COGS)
+SELECT MonthName, MAX(COGS) AS Max_COGS 
+FROM Amazon
+GROUP BY MonthName
+ORDER BY Max_COGS DESC 
+LIMIT 1;
+
+-- Product Line Generating Highest Revenue
+SELECT `Product Line`, SUM(Unit_Price * Quantity) AS Revenue 
+FROM Amazon
+GROUP BY `Product Line`
+ORDER BY Revenue DESC 
+LIMIT 1;
+
+-- City with Highest Revenue
+SELECT City, SUM(Unit_Price * Quantity) AS Revenue 
+FROM Amazon
+GROUP BY City
+ORDER BY Revenue DESC 
+LIMIT 1;
+
+-- Product Line with Highest Value Added Tax (VAT)
+SELECT `Product Line`, SUM(Tax5) AS VAT 
+FROM Amazon
+GROUP BY `Product Line`
+ORDER BY VAT DESC 
+LIMIT 1;
+
+/* RATING SALES PERFORMANCE */
+
+-- Add a Column Indicating Sales Performance ('Good' or 'Bad')
+SET @avg_sales = (SELECT AVG(Unit_Price * Quantity) FROM Amazon);
+
+ALTER TABLE Amazon ADD COLUMN Rating_Sales VARCHAR(25);
+
+UPDATE Amazon
+SET Rating_Sales =  
+    CASE
+        WHEN (Unit_Price * Quantity) > @avg_sales THEN 'Good' 
+        ELSE 'Bad' 
+    END;
+
+-- Identify the Branch That Exceeded Average Product Sales
+SELECT Branch, SUM(Quantity) AS Total_Products_Sold 
+FROM Amazon
+GROUP BY Branch
+HAVING SUM(Quantity) > (SELECT AVG(Total_Products) 
+                        FROM (SELECT SUM(Quantity) AS Total_Products FROM Amazon GROUP BY Branch) AS Avg_Table);
+
+-- Product Line Most Frequently Associated with Each Gender
+WITH Ranking AS (
+    SELECT `Product Line`, Gender, COUNT(Quantity) AS Frequency,
+           RANK() OVER (PARTITION BY Gender ORDER BY COUNT(Quantity) DESC) AS Rank
+    FROM Amazon
+    GROUP BY Gender, `Product Line`
+)
+SELECT `Product Line`, Gender, Frequency 
+FROM Ranking
+WHERE Rank = 1;
+
+-- Average Rating for Each Product Line
+SELECT `Product Line`, AVG(Rating) AS Average_Rating 
+FROM Amazon
+GROUP BY `Product Line`;
+
+-- Sales Occurrences for Each Time of Day on Every Weekday
+SELECT TimeOfDay, DayName, COUNT(*) AS Sales_Count 
+FROM Amazon
+GROUP BY TimeOfDay, DayName
+ORDER BY DayName, TimeOfDay;
+
+-- Customer Type Contributing the Highest Revenue
+SELECT Cust_Type, SUM(Unit_Price * Quantity) AS Revenue 
+FROM Amazon
+GROUP BY Cust_Type
+ORDER BY Revenue DESC 
+LIMIT 1;
+
+-- City with Highest VAT Percentage
+SELECT City, SUM(Tax5) AS Highest_VAT 
+FROM Amazon
+GROUP BY City
+ORDER BY Highest_VAT DESC 
+LIMIT 1;
+
+-- Customer Type with Highest VAT Payments
+SELECT Cust_Type, SUM(Tax5) AS VAT 
+FROM Amazon
+GROUP BY Cust_Type
+ORDER BY VAT DESC 
+LIMIT 1;
+
+-- Count of Distinct Customer Types
+SELECT COUNT(DISTINCT Cust_Type) AS Customer_Types FROM Amazon;
+
+-- Count of Distinct Payment Methods
+SELECT COUNT(DISTINCT Payment) AS Payment_Methods FROM Amazon;
+
+-- Most Frequent Customer Type
+SELECT Cust_Type, COUNT(*) AS Frequency 
+FROM Amazon
+GROUP BY Cust_Type
+ORDER BY Frequency DESC 
+LIMIT 1;
+
+-- Predominant Gender Among Customers
+SELECT Gender, COUNT(*) AS Gender_Count 
+FROM Amazon
+GROUP BY Gender
+ORDER BY Gender_Count DESC 
+LIMIT 1;
+
+-- Distribution of Genders Within Each Branch
+SELECT Branch, Gender, COUNT(*) AS Gender_Count 
+FROM Amazon
+GROUP BY Branch, Gender
+ORDER BY Branch, Gender;
+
+-- Time of Day When Customers Provide the Most Ratings
+SELECT TimeOfDay, COUNT(Rating) AS Rating_Count 
+FROM Amazon
+GROUP BY TimeOfDay;
+
+-- Time of Day with Highest Customer Ratings for Each Branch
+SELECT Branch, TimeOfDay, COUNT(Rating) AS Rating_Count 
+FROM Amazon
+GROUP BY Branch, TimeOfDay
+ORDER BY Branch, TimeOfDay;
+
+-- Day of the Week with the Highest Average Ratings
+SELECT DayName, AVG(Rating) AS Avg_Rating 
+FROM Amazon
+GROUP BY DayName
+ORDER BY Avg_Rating DESC 
+LIMIT 1;
+
+-- Day of the Week with Highest Average Ratings for Each Branch
+WITH Rankings AS (
+    SELECT Branch, DayName, AVG(Rating) AS Avg_Rating,
+           RANK() OVER (PARTITION BY Branch ORDER BY AVG(Rating) DESC) AS Rank
+    FROM Amazon
+    GROUP BY Branch, DayName
+)
+SELECT Branch, DayName, Avg_Rating 
+FROM Rankings
+WHERE Rank = 1;
+
