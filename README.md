@@ -72,3 +72,9 @@ customer behavior, and product performance.
 
 ## 📂 Project Structure
 
+---
+
+## 🙋‍♂️ Author
+  
+SQL Analysis by **Nikhil**  
+🔗 www.linkedin.com/in/nikhil-c-993548151
