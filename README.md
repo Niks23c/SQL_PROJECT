@@ -79,26 +79,34 @@ A series of SQL queries were executed to answer the following business questions
 
 ``sql
 SELECT Product Line, SUM(Unit_Price * Quantity) AS Total_Sales 
+
 FROM Amazon
+
 GROUP BY Product Line
+
 ORDER BY Total_Sales DESC 
+
 LIMIT 1;
 
  ![📊 Visual:](Visuals/Highest_product_line.jpg)
 
-📌 Insight: Food and Beverages generated the highest revenue, suggesting it’s a high-priority category for inventory and marketing.
+### 📌 Insight: Food and Beverages generated the highest revenue, suggesting it’s a high-priority category for inventory and marketing.
 
 ### 🔹 2. Which city generates the highest revenue?
 
 SELECT City, SUM(Unit_Price * Quantity) AS Revenue 
+
 FROM Amazon
+
 GROUP BY City
+
 ORDER BY Revenue DESC 
+
 LIMIT 1;
 
  ![📊 Visual:](Visuals/City_wise_revenue.jpg)
 
-📌 Insight: Naypyitaw leads in total revenue — indicating potential for warehouse expansion and regional ad targeting.
+### 📌 Insight: Naypyitaw leads in total revenue — indicating potential for warehouse expansion and regional ad targeting.
 
 ### 🔹 3. Who are the top-performing customers by type?
 
@@ -114,56 +122,69 @@ LIMIT 1;
 
  ![📊 Visual:](Visuals/Customer_type.jpg)
 
-📌 Insight: Members generate more sales, validating loyalty program success.
+### 📌 Insight: Members generate more sales, validating loyalty program success.
 
 ### 🔹 4. Which is/are the branch that exceeded average product sales? (SUBQUERY)
 
 SELECT Branch, SUM(Quantity) AS Total_Products_Sold 
 
 FROM Amazon
+
 GROUP BY Branch
-HAVING SUM(Quantity) > (SELECT AVG(Total_Products) 
-                        FROM (SELECT SUM(Quantity) AS Total_Products FROM Amazon GROUP BY Branch) AS Avg_Table);
+
+HAVING SUM(Quantity) > (SELECT AVG(Total_Products)
+                         FROM (SELECT SUM(Quantity) AS Total_Products FROM Amazon GROUP BY Branch) AS Avg_Table);
 
 📊 Visual:
 
-📌 Insight: 
+### 📌 Insight: 
 
 ### 🔹 5. What product lines are most preferred by gender? (With CTE)
 
 WITH Ranking AS (
-    SELECT Product Line, Gender, COUNT(Quantity) AS Frequency,
-           RANK() OVER (PARTITION BY Gender ORDER BY COUNT(Quantity) DESC) AS Rank
-    FROM Amazon
-    GROUP BY Gender, Product Line
+    
+  SELECT Product Line, Gender, COUNT(Quantity) AS Frequency,
+          
+  RANK() OVER (PARTITION BY Gender ORDER BY COUNT(Quantity) DESC) AS Rank
+   
+  FROM Amazon
+    
+  GROUP BY Gender, Product Line
 )
+
 SELECT Product Line, Gender, Frequency 
+
 FROM Ranking
+
 WHERE Rank = 1;
 
 
  ![📊 Visual:](Visuals/Gender_influence.jpg)
 
-📌 Insight:
-
-Females prefer Fashion Accessories
-
-Males prefer Health and beauty
+###📌 Insight: *Females prefer Fashion Accessories *Males prefer Health and beauty
 
 ### 🔹 6. Which day does each branch receive the best customer ratings?
+
 WITH Rankings AS (
-    SELECT Branch, DayName, AVG(Rating) AS Avg_Rating,
-           RANK() OVER (PARTITION BY Branch ORDER BY AVG(Rating) DESC) AS Rank
-    FROM Amazon
-    GROUP BY Branch, DayName
+    
+  SELECT Branch, DayName, AVG(Rating) AS Avg_Rating,
+        
+  RANK() OVER (PARTITION BY Branch ORDER BY AVG(Rating) DESC) AS Rank
+  
+  FROM Amazon
+
+   GROUP BY Branch, DayName
 )
+
 SELECT Branch, DayName, Avg_Rating 
+
 FROM Rankings
+
 WHERE Rank = 1;
 
  ![📊 Visual:](Visuals/Highest_rating.jpg)
 
-📌 Insight: Ratings vary across weekdays per branch — helpful for staffing and performance tracking.
+### 📌 Insight: Ratings vary across weekdays per branch — helpful for staffing and performance tracking.
 
 
 ### (FEATURE ENGINEERING)
@@ -174,21 +195,26 @@ SET @avg_sales = (SELECT AVG(Unit_Price * Quantity) FROM Amazon);
 ALTER TABLE Amazon ADD COLUMN Rating_Sales2 VARCHAR(25);
 
 UPDATE Amazon
+
 SET Rating_Sales2 =  
-    CASE
-        WHEN (Unit_Price * Quantity) > @avg_sales THEN 'Good' 
-        ELSE 'Bad' 
-    END;
+   
+  CASE
+      
+  WHEN (Unit_Price * Quantity) > @avg_sales THEN 'Good' 
+
+  ELSE 'Bad' 
+  
+   END;
 
 SELECT Branch, Rating_Sales2, 
-        RANK() OVEER(PARTITION BY branch) Rank_5 
+       
+  RANK() OVEER(PARTITION BY branch) Rank_5 
+
 FROM Amazon;
 
 ![📊 Visual:](Visuals/feature_engg_good_bad_sales.jpg)
 
-📌 Insight: 
-
-Branches mapped as per their performance and can be focused on such branches whose sales are lower.
+### 📌 Insight: Branches mapped as per their performance and can be focused on such branches whose sales are lower.
 
 ## 🏆 Advanced Insights & Patterns
 
