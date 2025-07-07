@@ -103,9 +103,13 @@ LIMIT 1;
 ### 🔹 3. Who are the top-performing customers by type?
 
 SELECT Cust_Type, SUM(Unit_Price * Quantity) AS Revenue 
+
 FROM Amazon
+
 GROUP BY Cust_Type
+
 ORDER BY Revenue DESC 
+
 LIMIT 1;
 
  ![📊 Visual:](Visuals/Customer_type.jpg)
@@ -115,6 +119,7 @@ LIMIT 1;
 ### 🔹 4. Which is/are the branch that exceeded average product sales? (SUBQUERY)
 
 SELECT Branch, SUM(Quantity) AS Total_Products_Sold 
+
 FROM Amazon
 GROUP BY Branch
 HAVING SUM(Quantity) > (SELECT AVG(Total_Products) 
