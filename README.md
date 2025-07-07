@@ -64,7 +64,7 @@ The goal of this project is to use **SQL-only** techniques to:
 | `Weekend Flag` | Created to compare weekday vs weekend sales |
 
 📷 **Feature Engineering Visual**:  
-![Feature Engineering](./FeatureEngg.png)
+![Feature Engineering](Visuals/FeatureEngg.png)
 
 
 ---
@@ -84,7 +84,7 @@ GROUP BY Product Line
 ORDER BY Total_Sales DESC 
 LIMIT 1;
 
- ![📊 Visual:](./Highest_product_line.png)
+ ![📊 Visual:](Visuals/Highest_product_line.png)
 
 📌 Insight: Food and Beverages generated the highest revenue, suggesting it’s a high-priority category for inventory and marketing.
 
@@ -96,7 +96,7 @@ GROUP BY City
 ORDER BY Revenue DESC 
 LIMIT 1;
 
- ![📊 Visual:](./City_wise_revenue.png)
+ ![📊 Visual:](Visuals/City_wise_revenue.png)
 
 📌 Insight: Naypyitaw leads in total revenue — indicating potential for warehouse expansion and regional ad targeting.
 
@@ -108,7 +108,7 @@ GROUP BY Cust_Type
 ORDER BY Revenue DESC 
 LIMIT 1;
 
- ![📊 Visual:](./Customer_type)
+ ![📊 Visual:](Visuals/Customer_type)
 
 📌 Insight: Members generate more sales, validating loyalty program success.
 
@@ -137,7 +137,7 @@ FROM Ranking
 WHERE Rank = 1;
 
 
- ![📊 Visual:](./Gender_influence)
+ ![📊 Visual:](Visuals/Gender_influence)
 
 📌 Insight:
 
@@ -156,7 +156,7 @@ SELECT Branch, DayName, Avg_Rating
 FROM Rankings
 WHERE Rank = 1;
 
- ![📊 Visual:](./Highest_rating)
+ ![📊 Visual:](Visuals/Highest_rating)
 
 📌 Insight: Ratings vary across weekdays per branch — helpful for staffing and performance tracking.
 
@@ -179,7 +179,7 @@ SELECT Branch, Rating_Sales2,
         RANK() OVEER(PARTITION BY branch) Rank_5 
 FROM Amazon;
 
-![📊 Visual:](./feature_engg_good_bad_sales)
+![📊 Visual:](Visuals/feature_engg_good_bad_sales)
 
 📌 Insight: 
 
