@@ -88,7 +88,7 @@ LIMIT 1;
 
 📌 Insight: Food and Beverages generated the highest revenue, suggesting it’s a high-priority category for inventory and marketing.
 
-🔹 2. Which city generates the highest revenue?
+### 🔹 2. Which city generates the highest revenue?
 
 SELECT City, SUM(Unit_Price * Quantity) AS Revenue 
 FROM Amazon
@@ -100,7 +100,7 @@ LIMIT 1;
 
 📌 Insight: Naypyitaw leads in total revenue — indicating potential for warehouse expansion and regional ad targeting.
 
-🔹 3. Who are the top-performing customers by type?
+### 🔹 3. Who are the top-performing customers by type?
 
 SELECT Cust_Type, SUM(Unit_Price * Quantity) AS Revenue 
 FROM Amazon
@@ -112,7 +112,7 @@ LIMIT 1;
 
 📌 Insight: Members generate more sales, validating loyalty program success.
 
-🔹 4. Which is/are the branch that exceeded average product sales? (SUBQUERY)
+### 🔹 4. Which is/are the branch that exceeded average product sales? (SUBQUERY)
 
 SELECT Branch, SUM(Quantity) AS Total_Products_Sold 
 FROM Amazon
@@ -124,7 +124,7 @@ HAVING SUM(Quantity) > (SELECT AVG(Total_Products)
 
 📌 Insight: 
 
-🔹 5. What product lines are most preferred by gender? (With CTE)
+### 🔹 5. What product lines are most preferred by gender? (With CTE)
 
 WITH Ranking AS (
     SELECT Product Line, Gender, COUNT(Quantity) AS Frequency,
@@ -145,7 +145,7 @@ Females prefer Fashion Accessories
 
 Males prefer Health and beauty
 
-🔹 6. Which day does each branch receive the best customer ratings?
+### 🔹 6. Which day does each branch receive the best customer ratings?
 WITH Rankings AS (
     SELECT Branch, DayName, AVG(Rating) AS Avg_Rating,
            RANK() OVER (PARTITION BY Branch ORDER BY AVG(Rating) DESC) AS Rank
@@ -161,8 +161,8 @@ WHERE Rank = 1;
 📌 Insight: Ratings vary across weekdays per branch — helpful for staffing and performance tracking.
 
 
-(FEATURE ENGINEERING)
-🔹 7. For each product line, add a column indicating "Good" if its sales are above average, otherwise "Bad". 
+### (FEATURE ENGINEERING)
+### 🔹 7. For each product line, add a column indicating "Good" if its sales are above average, otherwise "Bad". 
 
 SET @avg_sales = (SELECT AVG(Unit_Price * Quantity) FROM Amazon);
 
@@ -185,7 +185,7 @@ FROM Amazon;
 
 Branches mapped as per their performance and can be focused on such branches whose sales are lower.
 
-🏆 Advanced Insights & Patterns
+## 🏆 Advanced Insights & Patterns
 
 Gender-Based Product Preferences: Ranked using SQL RANK() and ROW_NUMBER()
 
@@ -196,7 +196,7 @@ Payment Preferences by Gender: Normalized trends
 Time-based Performance: Morning vs Afternoon vs Evening
 
 
-📌 Key Business Recommendations
+## 📌 Key Business Recommendations
 
 Focus marketing on Food and Beverages in Naypyitaw
 
